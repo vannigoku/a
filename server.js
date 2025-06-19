@@ -5,61 +5,68 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Conexión a MongoDB Atlas
-mongoose.connect('mongodb+srv://vannigoku:7156@cluster0.dn0jweo.mongodb.net/PAEC_Giovanni?retryWrites=true&w=majority&appName=Cluster0', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('Conectado a MongoDB'))
-.catch(err => console.error('Error de conexión:', err));
+// === CAMBIO: Usar variable de entorno para la URI de MongoDB ===
+const mongoURI = process.env.MONGO_URI;
 
-const AlumnoSchema = new mongoose.Schema({
-  nombre: String,
-  carrera: String,
-  semestre: Number,
-  tipo: String,
-  pesoKg: Number
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Conectado a MongoDB'))
+  .catch(err => console.error('Error de conexión:', err));
+
+const proyectoSchema = new mongoose.Schema({
+  titulo: String,
+  categoria: String,
+  descripcion: String,
+  responsable: String,
+  participantes: Number,
+  fecha: String,
+  estatus: String
 });
 
-const Alumno = mongoose.model('Alumno', AlumnoSchema);
+const Proyecto = mongoose.model('Proyecto', proyectoSchema);
 
-// Alta
-app.post('/api/alta', async (req, res) => {
+app.get('/api/proyectos', async (req, res) => {
   try {
-    const nuevo = new Alumno(req.body);
-    await nuevo.save();
-    res.redirect('/visualizar.html');
+    const proyectos = await Proyecto.find();
+    res.json(proyectos);
   } catch (err) {
-    res.status(500).send('Error al guardar');
+    res.status(500).json({ message: err.message });
   }
 });
 
-// Ver todos
-app.get('/api/alumnos', async (req, res) => {
-  const alumnos = await Alumno.find();
-  res.json(alumnos);
+app.post('/api/proyectos', async (req, res) => {
+  try {
+    const nuevo = new Proyecto(req.body);
+    const guardado = await nuevo.save();
+    res.status(201).json(guardado);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
-// Baja
-app.post('/api/baja', async (req, res) => {
-  await Alumno.deleteOne({ nombre: req.body.nombre });
-  res.redirect('/visualizar.html');
+app.put('/api/proyectos/:id', async (req, res) => {
+  try {
+    const actualizado = await Proyecto.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!actualizado) return res.status(404).json({ message: 'Proyecto no encontrado' });
+    res.json(actualizado);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 });
 
-// Actualizar
-app.post('/api/actualizar', async (req, res) => {
-  await Alumno.updateOne({ nombre: req.body.nombreOriginal }, {
-    nombre: req.body.nombreNuevo,
-    carrera: req.body.carrera,
-    semestre: req.body.semestre,
-    tipo: req.body.tipo,
-    pesoKg: req.body.pesoKg
-  });
-  res.redirect('/visualizar.html');
+app.delete('/api/proyectos/:id', async (req, res) => {
+  try {
+    const eliminado = await Proyecto.findByIdAndDelete(req.params.id);
+    if (!eliminado) return res.status(404).json({ message: 'Proyecto no encontrado' });
+    res.json({ message: 'Proyecto eliminado' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
-app.listen(3000, () => {
-  console.log('Servidor corriendo en puerto 3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });
