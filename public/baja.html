@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Baja - Proyecto PAEC Giovanni</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-primary bg-opacity-10">
   <div class="container py-5">
     <h1 class="text-center text-primary mb-4">Eliminar Proyecto</h1>
     <form id="formBaja" class="bg-white p-4 rounded shadow">
       <div class="mb-3">
-        <label for="titulo" class="form-label">Título del Proyecto</label>
-        <input type="text" class="form-control" id="titulo" required>
+        <label for="selectTitulo" class="form-label">Selecciona un Proyecto</label>
+        <select id="selectTitulo" class="form-select" required></select>
       </div>
       <button type="submit" class="btn btn-danger w-100">Eliminar</button>
     </form>
@@ -22,22 +22,35 @@
   </div>
 
   <script>
-    document.getElementById('formBaja').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const titulo = document.getElementById('titulo').value;
-      try {
-        const res = await fetch('/api/proyectos');
-        const proyectos = await res.json();
-        const proyecto = proyectos.find(p => p.titulo === titulo);
-        if (!proyecto) return alert('Proyecto no encontrado');
+    const selectTitulo = document.getElementById('selectTitulo');
 
-        const eliminar = await fetch(`/api/proyectos/${proyecto._id}`, { method: 'DELETE' });
-        if (!eliminar.ok) throw new Error('Error al eliminar');
-        alert('Proyecto eliminado correctamente');
-      } catch (err) {
-        alert('Error: ' + err.message);
+    async function cargarProyectos() {
+      const res = await fetch('/api/proyectos');
+      const proyectos = await res.json();
+      proyectos.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p._id;
+        opt.textContent = p.titulo;
+        selectTitulo.appendChild(opt);
+      });
+    }
+
+    document.getElementById('formBaja').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const id = selectTitulo.value;
+      const confirmar = confirm("¿Estás seguro de que quieres eliminar este proyecto?");
+      if (!confirmar) return;
+
+      const res = await fetch(`/api/proyectos/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        alert("Proyecto eliminado");
+        location.reload();
+      } else {
+        alert("Error al eliminar");
       }
     });
+
+    cargarProyectos();
   </script>
 </body>
 </html>

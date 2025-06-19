@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Actualizar - Proyecto PAEC Giovanni</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-primary bg-opacity-10">
   <div class="container py-5">
     <h1 class="text-center text-primary mb-4">Actualizar Proyecto</h1>
     <form id="formActualizar" class="bg-white p-4 rounded shadow">
       <div class="mb-3">
-        <label for="tituloBuscar" class="form-label">Título del Proyecto</label>
-        <input type="text" class="form-control" id="tituloBuscar" required>
+        <label for="selectTitulo" class="form-label">Selecciona Proyecto</label>
+        <select id="selectTitulo" class="form-select" required></select>
       </div>
 
-      <hr>
-      <h5 class="text-secondary">Nuevos datos</h5>
-
       <div class="mb-3">
+        <label class="form-label">¿Qué deseas actualizar?</label>
+        <select class="form-select" id="tipoActualizar">
+          <option value="todo">Todo</option>
+          <option value="descripcion">Solo Descripción</option>
+          <option value="estatus">Solo Estatus</option>
+        </select>
+      </div>
+
+      <div id="seccionDescripcion" class="mb-3">
         <label for="descripcion" class="form-label">Nueva Descripción</label>
-        <textarea class="form-control" id="descripcion" required></textarea>
+        <textarea id="descripcion" class="form-control"></textarea>
       </div>
-      <div class="mb-3">
+
+      <div id="seccionEstatus" class="mb-3">
         <label for="estatus" class="form-label">Nuevo Estatus</label>
-        <select class="form-select" id="estatus" required>
+        <select id="estatus" class="form-select">
           <option value="En proceso">En proceso</option>
           <option value="Completado">Completado</option>
         </select>
       </div>
+
       <button type="submit" class="btn btn-warning w-100">Actualizar</button>
     </form>
     <div class="text-center mt-4">
@@ -37,29 +45,53 @@
   </div>
 
   <script>
-    document.getElementById('formActualizar').addEventListener('submit', async function(e) {
+    const selectTitulo = document.getElementById('selectTitulo');
+    const tipoActualizar = document.getElementById('tipoActualizar');
+    const seccionDescripcion = document.getElementById('seccionDescripcion');
+    const seccionEstatus = document.getElementById('seccionEstatus');
+
+    async function cargarProyectos() {
+      const res = await fetch('/api/proyectos');
+      const proyectos = await res.json();
+      proyectos.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p._id;
+        opt.textContent = p.titulo;
+        selectTitulo.appendChild(opt);
+      });
+    }
+
+    tipoActualizar.addEventListener('change', () => {
+      const tipo = tipoActualizar.value;
+      seccionDescripcion.style.display = (tipo === 'todo' || tipo === 'descripcion') ? 'block' : 'none';
+      seccionEstatus.style.display = (tipo === 'todo' || tipo === 'estatus') ? 'block' : 'none';
+    });
+
+    document.getElementById('formActualizar').addEventListener('submit', async function (e) {
       e.preventDefault();
-      const tituloBuscar = document.getElementById('tituloBuscar').value;
-      const descripcion = document.getElementById('descripcion').value;
-      const estatus = document.getElementById('estatus').value;
+      const id = selectTitulo.value;
+      const tipo = tipoActualizar.value;
 
-      try {
-        const res = await fetch('/api/proyectos');
-        const proyectos = await res.json();
-        const proyecto = proyectos.find(p => p.titulo === tituloBuscar);
-        if (!proyecto) return alert('Proyecto no encontrado');
+      const datos = {};
+      if (tipo === 'todo' || tipo === 'descripcion') datos.descripcion = document.getElementById('descripcion').value;
+      if (tipo === 'todo' || tipo === 'estatus') datos.estatus = document.getElementById('estatus').value;
 
-        const actualizar = await fetch(`/api/proyectos/${proyecto._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ descripcion, estatus })
-        });
-        if (!actualizar.ok) throw new Error('Error al actualizar');
-        alert('Proyecto actualizado correctamente');
-      } catch (err) {
-        alert('Error: ' + err.message);
+      const res = await fetch(`/api/proyectos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+      });
+
+      if (res.ok) {
+        alert("Proyecto actualizado correctamente");
+        location.reload();
+      } else {
+        alert("Error al actualizar");
       }
     });
+
+    cargarProyectos();
+    tipoActualizar.dispatchEvent(new Event('change'));
   </script>
 </body>
 </html>
