@@ -4,21 +4,24 @@ const path = require('path');
 
 const app = express();
 
-// Middleware para parsear JSON y datos de formularios URL-encoded
+// Middleware para leer JSON y formularios
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos desde la carpeta "public"
+// Carpeta pública
 app.use(express.static(path.join(__dirname, 'public')));
 
-// URI de conexión a MongoDB desde variable de entorno
-const mongoURI = process.env.MONGO_URI;
+// === CONEXIÓN A MONGODB ATLAS ===
+const mongoURI = 'mongodb+srv://vannigoku:7156@cluster0.dn0jweo.mongodb.net/PAEC_Giovanni?retryWrites=true&w=majority';
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Conectado a MongoDB'))
-  .catch(err => console.error('Error de conexión:', err));
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log('✅ Conectado a MongoDB Atlas'))
+  .catch(err => console.error('❌ Error de conexión:', err));
 
-// Definición del esquema y modelo de Proyecto
+// === ESQUEMA Y MODELO ===
 const proyectoSchema = new mongoose.Schema({
   titulo: String,
   categoria: String,
@@ -29,9 +32,10 @@ const proyectoSchema = new mongoose.Schema({
   estatus: String
 });
 
-const Proyecto = mongoose.model('Proyecto', proyectoSchema);
+// Usa exactamente la colección 'proyectos_reciclaje'
+const Proyecto = mongoose.model('Proyecto', proyectoSchema, 'proyectos_reciclaje');
 
-// Rutas API REST
+// === RUTAS API ===
 
 // Obtener todos los proyectos
 app.get('/api/proyectos', async (req, res) => {
@@ -54,7 +58,7 @@ app.post('/api/proyectos', async (req, res) => {
   }
 });
 
-// Actualizar un proyecto por id
+// Actualizar proyecto por ID
 app.put('/api/proyectos/:id', async (req, res) => {
   try {
     const actualizado = await Proyecto.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -65,7 +69,7 @@ app.put('/api/proyectos/:id', async (req, res) => {
   }
 });
 
-// Eliminar un proyecto por id
+// Eliminar proyecto por ID
 app.delete('/api/proyectos/:id', async (req, res) => {
   try {
     const eliminado = await Proyecto.findByIdAndDelete(req.params.id);
@@ -76,8 +80,9 @@ app.delete('/api/proyectos/:id', async (req, res) => {
   }
 });
 
-// Iniciar servidor
+// === PUERTO DEL SERVIDOR ===
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
+
