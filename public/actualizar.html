@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Actualizar - Proyecto PAEC Giovanni</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-primary bg-opacity-10">
   <div class="container py-5">
@@ -24,14 +24,48 @@
         </select>
       </div>
 
-      <div id="seccionDescripcion" class="mb-3">
-        <label for="descripcion" class="form-label">Nueva Descripción</label>
-        <textarea id="descripcion" class="form-control"></textarea>
+      <div id="camposTodo" style="display:none;">
+        <div class="mb-3">
+          <label for="titulo" class="form-label">Título</label>
+          <input type="text" id="titulo" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label for="categoria" class="form-label">Categoría</label>
+          <input type="text" id="categoria" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label for="descripcion" class="form-label">Descripción</label>
+          <textarea id="descripcion" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="responsable" class="form-label">Responsable</label>
+          <input type="text" id="responsable" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label for="participantes" class="form-label">Participantes</label>
+          <input type="number" id="participantes" class="form-control" min="0" />
+        </div>
+        <div class="mb-3">
+          <label for="fecha" class="form-label">Fecha</label>
+          <input type="date" id="fecha" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label for="estatus" class="form-label">Estatus</label>
+          <select id="estatus" class="form-select">
+            <option value="En proceso">En proceso</option>
+            <option value="Completado">Completado</option>
+          </select>
+        </div>
       </div>
 
-      <div id="seccionEstatus" class="mb-3">
-        <label for="estatus" class="form-label">Nuevo Estatus</label>
-        <select id="estatus" class="form-select">
+      <div id="seccionDescripcion" class="mb-3" style="display:none;">
+        <label for="descripcionSolo" class="form-label">Nueva Descripción</label>
+        <textarea id="descripcionSolo" class="form-control"></textarea>
+      </div>
+
+      <div id="seccionEstatus" class="mb-3" style="display:none;">
+        <label for="estatusSolo" class="form-label">Nuevo Estatus</label>
+        <select id="estatusSolo" class="form-select">
           <option value="En proceso">En proceso</option>
           <option value="Completado">Completado</option>
         </select>
@@ -47,6 +81,8 @@
   <script>
     const selectTitulo = document.getElementById('selectTitulo');
     const tipoActualizar = document.getElementById('tipoActualizar');
+
+    const camposTodo = document.getElementById('camposTodo');
     const seccionDescripcion = document.getElementById('seccionDescripcion');
     const seccionEstatus = document.getElementById('seccionEstatus');
 
@@ -61,20 +97,65 @@
       });
     }
 
+    // Cuando cambias el tipo de actualización, mostrar/ocultar campos
     tipoActualizar.addEventListener('change', () => {
       const tipo = tipoActualizar.value;
-      seccionDescripcion.style.display = (tipo === 'todo' || tipo === 'descripcion') ? 'block' : 'none';
-      seccionEstatus.style.display = (tipo === 'todo' || tipo === 'estatus') ? 'block' : 'none';
+
+      camposTodo.style.display = tipo === 'todo' ? 'block' : 'none';
+      seccionDescripcion.style.display = tipo === 'descripcion' ? 'block' : 'none';
+      seccionEstatus.style.display = tipo === 'estatus' ? 'block' : 'none';
     });
 
-    document.getElementById('formActualizar').addEventListener('submit', async function (e) {
+    // Al seleccionar proyecto, cargar datos en inputs para editar (solo en "todo")
+    selectTitulo.addEventListener('change', async () => {
+      if (tipoActualizar.value !== 'todo') return;
+
+      const id = selectTitulo.value;
+      if (!id) return;
+
+      const res = await fetch(`/api/proyectos`);
+      const proyectos = await res.json();
+      const proyecto = proyectos.find(p => p._id === id);
+
+      if (proyecto) {
+        document.getElementById('titulo').value = proyecto.titulo || '';
+        document.getElementById('categoria').value = proyecto.categoria || '';
+        document.getElementById('descripcion').value = proyecto.descripcion || '';
+        document.getElementById('responsable').value = proyecto.responsable || '';
+        document.getElementById('participantes').value = proyecto.participantes || '';
+        document.getElementById('fecha').value = proyecto.fecha || '';
+        document.getElementById('estatus').value = proyecto.estatus || 'En proceso';
+      }
+    });
+
+    document.getElementById('formActualizar').addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const id = selectTitulo.value;
       const tipo = tipoActualizar.value;
 
-      const datos = {};
-      if (tipo === 'todo' || tipo === 'descripcion') datos.descripcion = document.getElementById('descripcion').value;
-      if (tipo === 'todo' || tipo === 'estatus') datos.estatus = document.getElementById('estatus').value;
+      if (!id) {
+        alert('Selecciona un proyecto');
+        return;
+      }
+
+      let datos = {};
+
+      if (tipo === 'todo') {
+        datos = {
+          titulo: document.getElementById('titulo').value,
+          categoria: document.getElementById('categoria').value,
+          descripcion: document.getElementById('descripcion').value,
+          responsable: document.getElementById('responsable').value,
+          participantes: Number(document.getElementById('participantes').value),
+          fecha: document.getElementById('fecha').value,
+          estatus: document.getElementById('estatus').value,
+        };
+      } else if (tipo === 'descripcion') {
+        datos.descripcion = document.getElementById('descripcionSolo').value;
+      } else if (tipo === 'estatus') {
+        datos.estatus = document.getElementById('estatusSolo').value;
+      }
 
       const res = await fetch(`/api/proyectos/${id}`, {
         method: 'PUT',
@@ -83,10 +164,10 @@
       });
 
       if (res.ok) {
-        alert("Proyecto actualizado correctamente");
+        alert('Proyecto actualizado con éxito');
         location.reload();
       } else {
-        alert("Error al actualizar");
+        alert('Error al actualizar el proyecto');
       }
     });
 
@@ -95,4 +176,5 @@
   </script>
 </body>
 </html>
+
 
