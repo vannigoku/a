@@ -1,100 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Actualizar Proyecto</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>Actualizar - Proyecto PAEC Giovanni</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <h1>Actualizar Proyecto</h1>
+<body class="bg-primary bg-opacity-10">
+  <div class="container py-5">
+    <h1 class="text-center text-primary mb-4">Actualizar Proyecto</h1>
+    <form id="formActualizar" class="bg-white p-4 rounded shadow">
+      <div class="mb-3">
+        <label for="tituloBuscar" class="form-label">Título del Proyecto</label>
+        <input type="text" class="form-control" id="tituloBuscar" required>
+      </div>
 
-  <form id="formSeleccion">
-    <label for="proyecto">Selecciona un proyecto:</label>
-    <select id="proyecto" required></select>
-    <button type="submit">Cargar</button>
-  </form>
+      <hr>
+      <h5 class="text-secondary">Nuevos datos</h5>
 
-  <form id="formActualizar" style="display:none;">
-    <input type="hidden" id="idProyecto">
-
-    <label>Título: <input type="text" id="titulo"></label><br>
-    <label>Categoría: <input type="text" id="categoria"></label><br>
-    <label>Descripción: <input type="text" id="descripcion"></label><br>
-    <label>Responsable: <input type="text" id="responsable"></label><br>
-    <label>Participantes: <input type="number" id="participantes"></label><br>
-    <label>Fecha: <input type="date" id="fecha"></label><br>
-    <label>Estatus:
-      <select id="estatus">
-        <option value="Completado">Completado</option>
-        <option value="En proceso">En proceso</option>
-      </select>
-    </label><br>
-
-    <button type="submit">Actualizar</button>
-  </form>
-
-  <a href="index.html">Regresar al menú</a>
+      <div class="mb-3">
+        <label for="descripcion" class="form-label">Nueva Descripción</label>
+        <textarea class="form-control" id="descripcion" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="estatus" class="form-label">Nuevo Estatus</label>
+        <select class="form-select" id="estatus" required>
+          <option value="En proceso">En proceso</option>
+          <option value="Completado">Completado</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-warning w-100">Actualizar</button>
+    </form>
+    <div class="text-center mt-4">
+      <a href="index.html" class="btn btn-secondary">Regresar al Menú</a>
+    </div>
+  </div>
 
   <script>
-    let proyectos = [];
+    document.getElementById('formActualizar').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const tituloBuscar = document.getElementById('tituloBuscar').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const estatus = document.getElementById('estatus').value;
 
-    // Cargar lista
-    fetch('/api/proyectos')
-      .then(res => res.json())
-      .then(data => {
-        proyectos = data;
-        const select = document.getElementById('proyecto');
-        data.forEach(p => {
-          const option = document.createElement('option');
-          option.value = p._id;
-          option.textContent = p.titulo;
-          select.appendChild(option);
+      try {
+        const res = await fetch('/api/proyectos');
+        const proyectos = await res.json();
+        const proyecto = proyectos.find(p => p.titulo === tituloBuscar);
+        if (!proyecto) return alert('Proyecto no encontrado');
+
+        const actualizar = await fetch(`/api/proyectos/${proyecto._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ descripcion, estatus })
         });
-      });
-
-    // Al seleccionar y dar click en cargar
-    document.getElementById('formSeleccion').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const id = document.getElementById('proyecto').value;
-      const proyecto = proyectos.find(p => p._id === id);
-
-      document.getElementById('formActualizar').style.display = 'block';
-      document.getElementById('idProyecto').value = proyecto._id;
-      document.getElementById('titulo').value = proyecto.titulo;
-      document.getElementById('categoria').value = proyecto.categoria;
-      document.getElementById('descripcion').value = proyecto.descripcion;
-      document.getElementById('responsable').value = proyecto.responsable;
-      document.getElementById('participantes').value = proyecto.participantes;
-      document.getElementById('fecha').value = proyecto.fecha;
-      document.getElementById('estatus').value = proyecto.estatus;
-    });
-
-    // Enviar actualización
-    document.getElementById('formActualizar').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const id = document.getElementById('idProyecto').value;
-
-      const datos = {
-        titulo: document.getElementById('titulo').value,
-        categoria: document.getElementById('categoria').value,
-        descripcion: document.getElementById('descripcion').value,
-        responsable: document.getElementById('responsable').value,
-        participantes: parseInt(document.getElementById('participantes').value),
-        fecha: document.getElementById('fecha').value,
-        estatus: document.getElementById('estatus').value
-      };
-
-      const res = await fetch(`/api/proyectos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(datos)
-      });
-
-      if (res.ok) {
+        if (!actualizar.ok) throw new Error('Error al actualizar');
         alert('Proyecto actualizado correctamente');
-        location.reload();
-      } else {
-        alert('Error al actualizar');
+      } catch (err) {
+        alert('Error: ' + err.message);
       }
     });
   </script>
