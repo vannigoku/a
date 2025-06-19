@@ -1,20 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Baja Alumno</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>Baja - Proyecto PAEC Giovanni</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <div class="container">
-    <h2>Baja de Alumno</h2>
-    <form action="/api/baja" method="POST">
-      <label class="form-label">Nombre del alumno a eliminar:</label>
-      <input class="form-control" type="text" name="nombre" required>
-      <br>
-      <button class="btn btn-danger" type="submit">Eliminar</button>
-      <a href="index.html" class="btn btn-secondary">Regresar</a>
+<body class="bg-primary bg-opacity-10">
+  <div class="container py-5">
+    <h1 class="text-center mb-4 text-primary">Eliminar Proyecto</h1>
+    <form action="/api/proyectos" method="DELETE" class="mx-auto" style="max-width: 500px;" id="formBaja">
+      <div class="mb-3">
+        <label for="id" class="form-label text-primary fw-semibold">ID del Proyecto a Eliminar</label>
+        <input type="text" class="form-control" id="id" name="id" placeholder="Ejemplo: 68531380b49fc23d75764cf4" required />
+      </div>
+      <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-danger btn-lg">Eliminar</button>
+        <a href="index.html" class="btn btn-secondary btn-lg">Regresar al Menú</a>
+      </div>
     </form>
   </div>
+
+  <script>
+    // Debido a que los navegadores no soportan método DELETE en formularios HTML,
+    // usamos JS para hacer fetch DELETE con el id del proyecto
+    const form = document.getElementById('formBaja');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = form.id.value.trim();
+      if(!id) {
+        alert('Por favor, ingresa un ID válido');
+        return;
+      }
+      try {
+        const res = await fetch('/api/proyectos/' + id, {
+          method: 'DELETE',
+        });
+        if(res.ok){
+          alert('Proyecto eliminado con éxito');
+          form.reset();
+        } else {
+          alert('Error al eliminar proyecto');
+        }
+      } catch(err) {
+        alert('Error en la petición: ' + err.message);
+      }
+    });
+  </script>
 </body>
 </html>
+
