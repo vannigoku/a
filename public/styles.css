@@ -1,0 +1,85 @@
+body {
+  background-color: #001f3f;
+  color: #ffffff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #7FDBFF;
+}
+
+a {
+  color: #7FDBFF;
+}
+
+a:hover {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: #0074D9;
+  border-color: #0074D9;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #339CFF;
+  border-color: #339CFF;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #FF4136;
+  border-color: #FF4136;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #FF6F61;
+  border-color: #FF6F61;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #003366;
+  border-color: #003366;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #00509E;
+  border-color: #00509E;
+  color: white;
+}
+
+.table {
+  color: #ffffff;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #003366;
+}
+
+.form-label {
+  color: #7FDBFF;
+}
+
+.form-control, .form-select {
+  background-color: #003366;
+  color: white;
+  border: 1px solid #0074D9;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: #004080;
+  color: white;
+  border-color: #7FDBFF;
+  box-shadow: 0 0 5px #7FDBFF;
+}
+
+.container {
+  background-color: #002B5B;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #001f3f;
+}

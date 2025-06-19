@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Alta Alumno</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Alta de Alumno</h2>
+    <form action="/api/alta" method="POST">
+      <label class="form-label">Nombre:</label>
+      <input class="form-control" type="text" name="nombre" required>
+      
+      <label class="form-label">Carrera:</label>
+      <input class="form-control" type="text" name="carrera" required>
+      
+      <label class="form-label">Semestre:</label>
+      <input class="form-control" type="number" name="semestre" required>
+      
+      <label class="form-label">Tipo de basura:</label>
+      <input class="form-control" type="text" name="tipo" required>
+      
+      <label class="form-label">Peso (Kg):</label>
+      <input class="form-control" type="number" name="pesoKg" step="0.1" required>
+      
+      <br>
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a href="index.html" class="btn btn-secondary">Regresar</a>
+    </form>
+  </div>
+</body>
+</html>

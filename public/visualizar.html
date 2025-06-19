@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Visualizar Alumnos</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    async function cargarDatos() {
+      const res = await fetch('/api/alumnos');
+      const datos = await res.json();
+      const tabla = document.getElementById('tabla');
+      datos.forEach(a => {
+        const fila = `<tr>
+          <td>${a.nombre}</td>
+          <td>${a.carrera}</td>
+          <td>${a.semestre}</td>
+          <td>${a.tipo}</td>
+          <td>${a.pesoKg} kg</td>
+        </tr>`;
+        tabla.innerHTML += fila;
+      });
+    }
+    window.onload = cargarDatos;
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Alumnos Registrados</h2>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Carrera</th>
+          <th>Semestre</th>
+          <th>Tipo</th>
+          <th>Peso (kg)</th>
+        </tr>
+      </thead>
+      <tbody id="tabla">
+      </tbody>
+    </table>
+    <a href="index.html" class="btn btn-secondary">Volver al inicio</a>
+  </div>
+</body>
+</html>

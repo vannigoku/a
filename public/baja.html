@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Baja Alumno</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Baja de Alumno</h2>
+    <form action="/api/baja" method="POST">
+      <label class="form-label">Nombre del alumno a eliminar:</label>
+      <input class="form-control" type="text" name="nombre" required>
+      <br>
+      <button class="btn btn-danger" type="submit">Eliminar</button>
+      <a href="index.html" class="btn btn-secondary">Regresar</a>
+    </form>
+  </div>
+</body>
+</html>
